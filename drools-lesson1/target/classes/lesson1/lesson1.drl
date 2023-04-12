@@ -1,0 +1,122 @@
+//#created on: 30 oct. 2010
+package lesson1
+
+//list any import classes here.
+import droolscours.Applicant;
+import droolscours.CustomerId;
+import droolscours.RuleOutcome;
+import droolscours.DetectionOutcome;
+import droolscours.Account;
+import droolscours.Customer;
+import droolscours.AccountingPeriod;
+import droolscours.PrivateAccount;
+import droolscours.CashFlow;
+import droolscours.util.OutputDisplay;
+
+//declare any global variables here
+
+
+global OutputDisplay showResult;
+
+rule "Your First Rule"
+
+	when
+		Account(  )
+	then
+		System.out.println("The bank account exists");
+
+end
+
+
+
+rule "Your First Rule revisited with Global"
+
+	when
+		Customer()
+	then
+		showResult.showText("A customer exists");
+
+end
+
+rule "Your First Rule revisited AccountingPeriod"
+
+	when
+		CashFlow(  )
+	then
+		showResult.showText("The CashFlow exists, inserting an accounting Period");
+		AccountingPeriod newPeriod = new AccountingPeriod();
+		insert (newPeriod);
+end
+
+rule "Rule on AccountingPeriod that are inserting"
+	when
+		AccountingPeriod ()
+	then
+		showResult.showText("Accounting period exists");
+end
+
+rule "rule_01"
+	no-loop true
+	when
+		$app: Applicant(  )
+	then
+		insert (new RuleOutcome (drools.getRule().getName(), $app.getCustomer()));
+		showResult.showText("The applicant exists");
+
+end
+
+rule "rule_02"
+	no-loop true
+	when
+		$app: Applicant( customer.id == "ME002")
+	then
+		insert (new RuleOutcome (drools.getRule().getName(), $app.getCustomer()));
+		showResult.showText("The ME002 applicant exists");
+
+end
+
+rule "rule_03"
+	no-loop true
+	when
+		$app: Applicant( customer.id == "ME002")
+	then
+		insert (new RuleOutcome (drools.getRule().getName(), $app.getCustomer()));
+		showResult.showText("The ME002 applicant still exists");
+
+end
+
+rule "rule_detect"
+	no-loop true
+	when		
+		not DetectionOutcome ( )
+	then
+		insert (new DetectionOutcome());
+		showResult.showText("A detection outcome is created");
+
+end
+
+rule "rule_summary"
+	no-loop true
+	when
+		$rule : RuleOutcome ( )
+		$d: DetectionOutcome ( )
+	then
+		update ($d) {
+			$d.setAlert(true);
+			$d.addRule($rule);
+		}
+		showResult.showText("A rule outcome exists: " + $rule.getRuleName());
+
+end
+
+rule "rule_acc"
+	no-loop true
+	when
+		//$rule : RuleOutcome ( )
+		accumulate( r: RuleOutcome(); cnt: count(r) )
+		
+	then
+		
+		showResult.showText("Executing accumulate " + cnt);
+
+end
